@@ -215,7 +215,8 @@ if __name__ == "__main__":
             package = package.split('@')
             spack_name = parse_single_package(package)
             print (
-                "Use `spack edit {}` to inspect parsed file.".format(spack_name))
+                "Use `spack edit {}` to inspect " +
+                "parsed file.".format(spack_name))
             print (
                 "or `spack install {}` to install package.".format(spack_name))
         else:
@@ -241,4 +242,3 @@ if __name__ == "__main__":
             edit_names = spack_names
             f1.writelines(edit_names)
             f1.close()
-
