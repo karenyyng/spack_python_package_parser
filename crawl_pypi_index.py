@@ -50,25 +50,22 @@ def get_PyPI_download_URL_and_md5(package):
     if version not in package_info["releases"]:
         stable_ver = package_info["info"]["version"]
         print ("version specified {0} does not match release ".format(version) +
-            " versions.".format(stable_ver))
+               " versions.".format(stable_ver))
         print ("Latest stable release version is " +
-            "{}\n".format(stable_ver))
+               "{}\n".format(stable_ver))
         use_stable_ver = raw_input("Use version {}? ".format(stable_ver) +
-                            "(1 for True, 0 for False): ")
-        use_stable_var = int(use_stable_ver)
+                                   "(1 for True, 0 for False): ")
+        use_stable_ver = int(use_stable_ver)
 
         if use_stable_ver == 1:
             version = stable_ver
         else:
-            retry = 0
             while(version not in package_info["releases"]):
                 print ("Choose from the list of release version: ")
                 map(print, package_info["releases"].keys())
                 version = \
                     raw_input(
-                        "Try no: {}. \n".format(retry) +
                         "Type in one of the version numbers printed above: ")
-                retry += 1
             print ("version chosen is {}".format(version))
             if len(package_info["releases"][version]) == 0:
                 raise ValueError(
