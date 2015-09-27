@@ -104,7 +104,8 @@ def get_PyPI_download_URL_and_md5(package):
 
 def parse_package_py_content(parsed_info):
     import re
-    package_name = parsed_info["name"][0].upper() + parsed_info["name"][1:]
+    package_name = \
+        parsed_info["name"][0].upper() + parsed_info["name"][1:].lower()
     package_name = re.split("[^0-9a-zA-Z]", package_name)
     package_name = [name[0].upper() + name[1:] for name in package_name]
     package_name = ''.join(package_name)
@@ -218,14 +219,11 @@ if __name__ == "__main__":
             print (
                 "or `spack install {}` to install package.".format(spack_name))
         else:
-            now = datetime.now().strftime("%Y/%m/%d_%H_%M")
-            output_file1 = "./inspect_parsed_file_{}.sh".format(now)
-            output_file2 = "./install_parsed_packages_{}.sh".format(now)
+            now = datetime.now().strftime("%Y_%m_%d_%H_%M")
+            output_file1 = "./parsed_file_{}.txt".format(now)
+            # output_file2 = "./install_parsed_packages_{}.sh".format(now)
 
             print ("A text file containing multiple package names is supplied.")
-            print ("A list of parsed command to install / edit package will " +
-                   "be written as ./{0} and ./{1}".format(output_file1,
-                                                          output_file2))
 
             input_fs = open(package, 'r')
             packages = input_fs.readlines()
@@ -234,14 +232,13 @@ if __name__ == "__main__":
             spack_names = map(parse_single_package, packages)
             spack_names = [name + '\n' for name in spack_names]
 
+            print ("A list of parsed command to install / edit package " +
+                   "has been written to \n{0} ".format(output_file1))
+            print ("Use `$ cat {0} | xargs spack " +
+                   "install` to install".format(output_file1))
+
             f1 = open(output_file1, mode='w')
-            f1.write("#!/bin/bash\n")
-            edit_names = ['spack edit ' + name for name in spack_names]
+            edit_names = spack_names
             f1.writelines(edit_names)
             f1.close()
 
-            f2 = open(output_file2, mode='w')
-            f2.write("#!/bin/bash\n")
-            install_names = ['spack install ' + name for name in spack_names]
-            f2.writelines(edit_names)
-            f2.close()
