@@ -134,7 +134,7 @@ def write_package_file(parsed_info):
             else:
                 f.write("    " +
                         "version('{0}', '{1}',\n".format(parsed_info["version"],
-                                                       parsed_info["md5checksum"]) +
+                                                         parsed_info["md5checksum"]) +
                         "           " + \
                         "url='{0}')".format(parsed_info["download_link"])
                         )
