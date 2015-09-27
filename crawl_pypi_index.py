@@ -226,10 +226,10 @@ if __name__ == "__main__":
             spack_names = map(parse_single_package, packages)
             spack_names = [name + '\n' for name in spack_names]
 
-            print ("A list of parsed command to install / edit package " +
+            print ("A list of modified package names " +
                    "has been written to \n{0} ".format(output_file1))
-            print ("Use `$ cat {0} | xargs spack " +
-                   "install` to install".format(output_file1))
+            print ("Use `$ cat {0} | xargs spack ".format(output_file1) +
+                   "install` to install")
 
             f1 = open(output_file1, mode='w')
             edit_names = spack_names
