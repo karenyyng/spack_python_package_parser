@@ -208,8 +208,8 @@ if __name__ == "__main__":
             package = package.split('@')
             spack_name = parse_single_package(package)
             print (
-                "Use `spack edit {}` to inspect " +
-                "parsed file.".format(spack_name))
+                "Use `spack edit {}` to inspect ".format(spack_name) +
+                "parsed file.")
             print (
                 "or `spack install {}` to install package.".format(spack_name))
         else:
