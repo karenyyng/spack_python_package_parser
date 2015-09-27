@@ -88,12 +88,12 @@ def get_PyPI_download_URL_and_md5(package):
                    "md5checksum": md5_digest}
 
     if "summary" in package_info['info']:
-        return_this["summary"] = package_info['info']['summary']
+        return_this["summary"] = package_info['info']['summary'].strip()
     if "home_page" in package_info['info']:
-        return_this["homepage"] = package_info['info']['home_page']
+        return_this["homepage"] = package_info['info']['home_page'].strip()
 
-    return_this["name"] = package[0]
-    return_this["version"] = version
+    return_this["name"] = package[0].strip()
+    return_this["version"] = version.strip()
 
     print ("Package download link is {}".format(download_link))
     print ("md5 checksum is: {}".format(md5_digest))
@@ -229,7 +229,8 @@ if __name__ == "__main__":
 
             input_fs = open(package, 'r')
             packages = input_fs.readlines()
-            packages = [p.strip() for p in packages if p and p != '\n']
+            packages = [p.strip().split('@') for p in packages
+                        if p and p != '\n']
             spack_names = map(parse_single_package, packages)
             spack_names = [name + '\n' for name in spack_names]
 
@@ -244,5 +245,3 @@ if __name__ == "__main__":
             install_names = ['spack install ' + name for name in spack_names]
             f2.writelines(edit_names)
             f2.close()
-
-
