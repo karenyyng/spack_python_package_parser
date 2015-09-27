@@ -73,8 +73,8 @@ def get_PyPI_download_URL_and_md5(package):
                     "for {0}@{1}".format(package[0], version))
 
     download_link = [[ver["url"], ver["md5_digest"]]
-                    for ver in package_info["releases"][version]
-                    if 'tar.gz' in ver["url"]]
+                     for ver in package_info["releases"][version]
+                     if 'tar.gz' in ver["url"]]
 
     if len(download_link) == 1:
         md5_digest = download_link[0][1]
@@ -172,5 +172,3 @@ if __name__ == "__main__":
 
     parsed_info = get_PyPI_download_URL_and_md5(package)
     write_package_file(parsed_info)
-
-
