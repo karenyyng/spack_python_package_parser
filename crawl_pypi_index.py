@@ -42,46 +42,38 @@ def get_PyPI_download_URL_and_md5(package):
         package_URL = \
             "http://pypi.python.org/pypi/{0}/{1}/json".format(*package)
 
-    try:
-        print ("Querying {}".format(package_URL))
-        response = urllib2.urlopen(package_URL)
+    print ("Querying {}".format(package_URL))
+    response = urllib2.urlopen(package_URL)
 
-    except urllib2.HTTPError:
-        print ("HTTPError: cannot find {} ".format('@'.join(package)) +
-               "from http://pypi.python.org"
-               )
-        response = None
+    package_info = json.load(response)
 
-    if response is not None:
-        package_info = json.load(response)
+    if version not in package_info["releases"]:
+        stable_ver = package_info["info"]["version"]
+        print ("version specified {0} does not match release ".format(version) +
+            " versions.".format(stable_ver))
+        print ("Latest stable release version is " +
+            "{}\n".format(stable_ver))
+        use_stable_ver = raw_input("Use version {}? ".format(stable_ver) +
+                            "(1 for True, 0 for False): ")
+        use_stable_var = int(use_stable_ver)
 
-        if version not in package_info["releases"]:
-            stable_ver = package_info["info"]["version"]
-            print ("version specified {0} does not match release ".format(version) +
-                " versions.".format(stable_ver))
-            print ("Latest stable release version is " +
-                "{}\n".format(stable_ver))
-            use_stable_ver = raw_input("Use version {}? ".format(stable_ver) +
-                                "(1 for True, 0 for False): ")
-            use_stable_var = int(use_stable_ver)
-
-            if use_stable_ver == 1:
-                version = stable_ver
-            else:
-                retry = 0
-                while(version not in package_info["releases"]):
-                    print ("Choose from the list of release version: ")
-                    map(print, package_info["releases"].keys())
-                    version = \
-                        raw_input(
-                            "Try no: {}. \n".format(retry) +
-                            "Type in one of the version numbers printed above: ")
-                    retry += 1
-                print ("version chosen is {}".format(version))
-                if len(package_info["releases"][version]) == 0:
-                    raise ValueError(
-                        "No suitable tar.gz was found " +
-                        "for {0}@{1}".format(package[0], version))
+        if use_stable_ver == 1:
+            version = stable_ver
+        else:
+            retry = 0
+            while(version not in package_info["releases"]):
+                print ("Choose from the list of release version: ")
+                map(print, package_info["releases"].keys())
+                version = \
+                    raw_input(
+                        "Try no: {}. \n".format(retry) +
+                        "Type in one of the version numbers printed above: ")
+                retry += 1
+            print ("version chosen is {}".format(version))
+            if len(package_info["releases"][version]) == 0:
+                raise ValueError(
+                    "No suitable tar.gz was found " +
+                    "for {0}@{1}".format(package[0], version))
 
     download_link = [[ver["url"], ver["md5_digest"]]
                     for ver in package_info["releases"][version]
