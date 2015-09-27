@@ -157,18 +157,19 @@ def write_package_file(parsed_info):
         f = open(filedir + "/package.py", "r")
         lines = f.readlines()
         f.close()
-        print ("Appending new version {0} of {1}".format(
-            parsed_info["version"], parsed_info["name"]) +
-            " to {}/package.py".format(filedir)
-        )
-        f = open(filedir + "/package.py", "w")
         line_no_w_version = [line_no for line_no, line in enumerate(lines)
                              if 'version' in line]
 
         version_exists = check_if_version_exists(line_no_w_version, lines,
                                                  parsed_info["version"])
+        line_no_w_version = line_no_w_version[0]
 
         if not version_exists:
+            print ("Appending new version {0} of {1}".format(
+                parsed_info["version"], parsed_info["name"]) +
+                " to {}/package.py".format(filedir)
+            )
+            f = open(filedir + "/package.py", "w")
             for line_no, line in enumerate(lines):
                 if line_no != line_no_w_version:
                     f.write(line)
