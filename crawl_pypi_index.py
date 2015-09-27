@@ -130,6 +130,24 @@ def parse_package_py_content(parsed_info):
     return lines
 
 
+def check_if_version_exists(line_no_w_version, lines, version):
+    # assume that people writing this package.py file
+    # use 4 spaces as indentation.
+    # if not, use autopep8 to clean up syntax
+    version_lines = [lines[no][12:]
+                     .split(',')[0]  # leave only the version info
+                     .replace("'", '')  # remove single quotes
+                     .replace('"', '')  # remove double quotes
+                     .strip()
+                     for no in line_no_w_version]
+
+    for exist_ver in version_lines:
+        if exist_ver == version.strip():
+            print ("Version info exists for this package, " +
+                   "nothing needs to be done.")
+            return True
+
+
 def write_package_file(parsed_info):
     SPACK_PATH = os.environ["SPACK_ROOT"]
     filedir = SPACK_PATH + "/var/spack/packages/py-" + \
@@ -145,20 +163,24 @@ def write_package_file(parsed_info):
         )
         f = open(filedir + "/package.py", "w")
         line_no_w_version = [line_no for line_no, line in enumerate(lines)
-                             if 'version' in line][0]
+                             if 'version' in line]
 
-        for line_no, line in enumerate(lines):
-            if line_no != line_no_w_version:
-                f.write(line)
-            else:
-                append_line = \
-                    "    " + \
-                    "version('{0}',".format(parsed_info["version"]) + \
-                    "'{0}',\n".format(parsed_info["md5checksum"]) + \
-                    "           " + \
-                    "url='{0}')".format(parsed_info["download_link"])
-                f.write(append_line + "\n")
-                f.write(line)
+        version_exists = check_if_version_exists(line_no_w_version, lines,
+                                                 parsed_info["version"])
+
+        if not version_exists:
+            for line_no, line in enumerate(lines):
+                if line_no != line_no_w_version:
+                    f.write(line)
+                else:
+                    append_line = \
+                        "    " + \
+                        "version('{0}',".format(parsed_info["version"]) + \
+                        "'{0}',\n".format(parsed_info["md5checksum"]) + \
+                        "           " + \
+                        "url='{0}')".format(parsed_info["download_link"])
+                    f.write(append_line + "\n")
+                    f.write(line)
 
     else:
         print ("Writing parsed info to {}/package.py".format(filedir))
