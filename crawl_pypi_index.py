@@ -113,14 +113,36 @@ def get_PyPI_download_URL_and_md5(package):
     return return_this
 
 
+def parse_package_py_content(parsed_info):
+    lines = [
+        "from spack import *",
+        "",
+        "class Py{}(Package):".format(parsed_info["name"][0].upper() +
+                                      parsed_info["name"][1:]
+                                      ),
+        '    """{}"""'.format(parsed_info["summary"]),
+        '    homepage = "{}"'.format(parsed_info["homepage"]),
+        '    version("{0}", "{1}",'.format(parsed_info["version"],
+                                           parsed_info["md5checksum"]
+                                           ),
+        '            url="{}")'.format(parsed_info["download_link"]),
+        '',
+        '    extends("python")',
+        "",
+        '    def install(self, spec, prefix):',
+        '        python("setup.py", "install", "--prefix=%s" % prefix)'
+        ]
+
+    lines = [l + "\n" for l in lines]
+    return lines
+
+
 def write_package_file(parsed_info):
     SPACK_PATH = os.environ["SPACK_ROOT"]
     filedir = SPACK_PATH + "/var/spack/packages/py-" + \
         parsed_info["name"].strip()
 
     if os.path.exists(filedir + "/package.py"):
-        # backup files
-        os.system("cp {}/package.py {}/package.py.backup ".format(filedir))
         f = open(filedir + "/package.py", "r")
         lines = f.readlines()
         f.close()
@@ -128,17 +150,24 @@ def write_package_file(parsed_info):
         line_no_w_version = [line_no for line_no, line in enumerate(lines)
                              if 'version' in line][0]
 
-        for line_no, line in lines:
+        for line_no, line in enumerate(lines):
             if line_no != line_no_w_version:
                 f.write(line)
             else:
-                f.write("    " +
-                        "version('{0}', '{1}',\n".format(parsed_info["version"],
-                                                         parsed_info["md5checksum"]) +
-                        "           " + \
-                        "url='{0}')".format(parsed_info["download_link"])
-                        )
+                append_line = \
+                    "    " + \
+                    "version('{0}',".format(parsed_info["version"]) + \
+                    "'{0}',\n".format(parsed_info["md5checksum"]) + \
+                    "           " + \
+                    "url='{0}')".format(parsed_info["download_link"])
+                f.write(append_line + "\n")
                 f.write(line)
+
+    else:
+        f = open(filedir + "/package.py", "w")
+        lines = parse_package_py_content(parsed_info)
+        f.writelines(lines)
+        f.close()
 
 
 if __name__ == "__main__":
@@ -153,5 +182,6 @@ if __name__ == "__main__":
         package = package.split('@')
 
     parsed_info = get_PyPI_download_URL_and_md5(package)
+    write_package_file(parsed_info)
 
 
