@@ -103,12 +103,16 @@ def get_PyPI_download_URL_and_md5(package):
 
 
 def parse_package_py_content(parsed_info):
+    import re
+    package_name = parsed_info["name"][0].upper() + parsed_info["name"][1:]
+    package_name = re.split("[^0-9a-zA-Z]", package_name)
+    package_name = [name[0].upper() + name[1:] for name in package_name]
+    package_name = ''.join(package_name)
+
     lines = [
         "from spack import *",
         "",
-        "class Py{}(Package):".format(parsed_info["name"][0].upper() +
-                                      parsed_info["name"][1:]
-                                      ),
+        "class Py{}(Package):".format(package_name),
         '    """{}"""'.format(parsed_info["summary"]),
         '    homepage = "{}"'.format(parsed_info["homepage"]),
         '    version("{0}", "{1}",'.format(parsed_info["version"],
@@ -135,6 +139,10 @@ def write_package_file(parsed_info):
         f = open(filedir + "/package.py", "r")
         lines = f.readlines()
         f.close()
+        print ("Appending new version {0} of {1}".format(
+            parsed_info["version"], parsed_info["name"]) +
+            " to {}/package.py".format(filedir)
+        )
         f = open(filedir + "/package.py", "w")
         line_no_w_version = [line_no for line_no, line in enumerate(lines)
                              if 'version' in line][0]
@@ -153,22 +161,65 @@ def write_package_file(parsed_info):
                 f.write(line)
 
     else:
+        print ("Writing parsed info to {}/package.py".format(filedir))
+        os.system('mkdir {}'.format(filedir))
         f = open(filedir + "/package.py", "w")
         lines = parse_package_py_content(parsed_info)
         f.writelines(lines)
         f.close()
+    return
+
+
+def parse_single_package(package):
+    parsed_info = get_PyPI_download_URL_and_md5(package)
+    write_package_file(parsed_info)
+    return "py-" + parsed_info["name"] + '@' + parsed_info['version']
 
 
 if __name__ == "__main__":
-    # if len(sys.argv) < 2:
-    #     raise ValueError("Require argument for the text file with packages.")
+    from datetime import datetime
 
     if len(sys.argv) < 2:
-        raise ValueError("Require argument for the package name.")
+        raise ValueError("Require argument for the package name. e.g.\n" +
+                         "$ ./crawl_pypi_index.py ipython@4.0.0\n"
+                         )
 
     elif len(sys.argv) == 2:
         package = sys.argv[1]
-        package = package.split('@')
+        if ".txt" not in package:
+            print ("Detected single package name is supplied.")
+            package = package.split('@')
+            spack_name = parse_single_package(package)
+            print (
+                "Use `spack edit {}` to inspect parsed file.".format(spack_name))
+            print (
+                "or `spack install {}` to install package.".format(spack_name))
+        else:
+            now = datetime.now().strftime("%Y/%m/%d_%H_%M")
+            output_file1 = "./inspect_parsed_file_{}.sh".format(now)
+            output_file2 = "./install_parsed_packages_{}.sh".format(now)
 
-    parsed_info = get_PyPI_download_URL_and_md5(package)
-    write_package_file(parsed_info)
+            print ("A text file containing multiple package names is supplied.")
+            print ("A list of parsed command to install / edit package will " +
+                   "be written as ./{0} and ./{1}".format(output_file1,
+                                                          output_file2))
+
+            input_fs = open(package, 'r')
+            packages = input_fs.readlines()
+            packages = [p.strip() for p in packages if p and p != '\n']
+            spack_names = map(parse_single_package, packages)
+            spack_names = [name + '\n' for name in spack_names]
+
+            f1 = open(output_file1, mode='w')
+            f1.write("#!/bin/bash\n")
+            edit_names = ['spack edit ' + name for name in spack_names]
+            f1.writelines(edit_names)
+            f1.close()
+
+            f2 = open(output_file2, mode='w')
+            f2.write("#!/bin/bash\n")
+            install_names = ['spack install ' + name for name in spack_names]
+            f2.writelines(edit_names)
+            f2.close()
+
+
