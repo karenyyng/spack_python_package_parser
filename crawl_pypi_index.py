@@ -9,13 +9,6 @@ package_name_2@version
 ...
 see `spack_py_package_list.txt` for an example.
 
-What works:
-parsing package info from the web
-
-Work in progress:
-The corresponding package.py files will be written out in the appropriate
-directory under `spack`
-
 Prerequisite:
     * working version of `spack`
     * environmental variable `SPACK_ROOT` to be set correctly
