@@ -85,7 +85,8 @@ def get_PyPI_download_URL_and_md5(package):
     if "home_page" in package_info['info']:
         return_this["homepage"] = package_info['info']['home_page'].strip()
 
-    return_this["name"] = package[0].strip()
+    # make sure that the package name is all in lower case
+    return_this["name"] = package[0].strip().lower()
     return_this["version"] = version.strip()
 
     print ("Package download link is {}".format(download_link))
