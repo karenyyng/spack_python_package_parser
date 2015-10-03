@@ -21,14 +21,12 @@ from __future__ import print_function
 import sys
 import urllib2
 import json
-import os
 
 
-def get_PyPI_download_URL_and_md5(package):
+def get_PyPI_download_URL_and_md5(package, cert=None):
     if len(package) == 1:
         package_URL = "http://pypi.python.org/pypi/{0}/json".format(package[0])
         version = None
-        print ("No version of the package {} was specified.".format(package[0]))
 
     elif len(package) == 2:
         version = package[1].strip()
@@ -36,14 +34,18 @@ def get_PyPI_download_URL_and_md5(package):
             "http://pypi.python.org/pypi/{0}/{1}/json".format(*package)
 
     print ("Querying {}".format(package_URL))
-    response = urllib2.urlopen(package_URL)
+    if cert is None:
+        response = urllib2.urlopen(package_URL)
+    else:
+        response = urllib2.urlopen(package_URL, cafile=cert)
 
     package_info = json.load(response)
 
     if version not in package_info["releases"]:
         stable_ver = package_info["info"]["version"]
-        print ("version specified {0} does not match release ".format(version) +
-               " versions.".format(stable_ver))
+        print ("Specified version was {0},".format(version) +
+               ' which does not match any version on PyPI.'
+               )
         print ("Latest stable release version is " +
                "{}\n".format(stable_ver))
         use_stable_ver = raw_input("Use version {}? ".format(stable_ver) +
@@ -188,26 +190,39 @@ def write_package_file(parsed_info):
     return
 
 
-def parse_single_package(package):
-    parsed_info = get_PyPI_download_URL_and_md5(package)
+def parse_single_package(package, cert=None):
+    parsed_info = get_PyPI_download_URL_and_md5(package, cert=cert)
     write_package_file(parsed_info)
     return "py-" + parsed_info["name"] + '@' + parsed_info['version']
 
 
 if __name__ == "__main__":
     from datetime import datetime
+    import os
 
     if len(sys.argv) < 2:
         raise ValueError("Require argument for the package name. e.g.\n" +
                          "$ ./crawl_pypi_index.py ipython@4.0.0\n"
                          )
 
-    elif len(sys.argv) == 2:
+    elif len(sys.argv) >= 2:
         package = sys.argv[1]
+        if len(sys.argv) == 3:
+            cert = sys.argv[2]
+            if not os.path.isfile(cert):
+                raise ValueError(
+                    "Certificate path {} is not valid.".format(cert))
+        else:
+            cert = None
         if ".txt" not in package:
             print ("Detected single package name is supplied.")
+            if cert is None:
+                print ("No SSL certificate is supplied.")
+            else:
+                print ("SSL certificate is supplied: {}".format(cert))
+
             package = package.split('@')
-            spack_name = parse_single_package(package)
+            spack_name = parse_single_package(package, cert=cert)
             print (
                 "Use `spack edit {}` to inspect ".format(spack_name) +
                 "parsed file.")
@@ -224,7 +239,8 @@ if __name__ == "__main__":
             packages = input_fs.readlines()
             packages = [p.strip().split('@') for p in packages
                         if p and p != '\n']
-            spack_names = map(parse_single_package, packages)
+            spack_names = map(lambda p: parse_single_package(p, cert=cert),
+                              packages)
             spack_names = [name + '\n' for name in spack_names]
 
             print ("A list of modified package names " +

@@ -9,7 +9,7 @@ simple script that crawls PyPI indices API for download info for a Python packag
 
 ## grep download info for single package
 ```
-$ ./crawl_pypi_index.py ipython@4.0.0
+$ ./crawl_pypi_index.py ipython@4.0.0 PATH_TO_SSL_CERTIFICATE
 Detected single package name is supplied.
 Querying http://pypi.python.org/pypi/ipython/4.0.0/json
 Package download link is
@@ -23,7 +23,7 @@ or `spack install py-ipython@4.0.0` to install package.
 
 ## grep info for a bunch of files 
 ```
-$ ./crawl_pypi_index.py spack_py_package_list.txt
+$ ./crawl_pypi_index.py spack_py_package_list.txt PATH_TO_SSL_CERTIFICATE
 A text file containing multiple package names is supplied.
 Querying http://pypi.python.org/pypi/Cython/0.21.2/json
 Package download link is
@@ -37,10 +37,13 @@ A list of modified package names has been written to
 ./parsed_file_2015_09_27_12_31.txt
 Use `$ cat ./parsed_file_2015_09_27_12_31.txt | xargs spack install` to install
 ```
+# resolved issues
+
+* SSL CERTIFICATION ERROR from urllib2 - now you can specify a SSL certificate
+    to be used 
 
 # known issues 
 
-* SSL CERTIFICATION ERROR from urllib2 - unresolved for certain python versions
 * package without `tar.gz` download format cannot be installed - `Spack` currently doesn't
     support installation of other formats 
 * python executables installed with `Spack` may have a Shebang that is too long. See this [Github
