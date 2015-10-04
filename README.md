@@ -44,9 +44,7 @@ Only supply it if there is an error.
 
 # Resolved issues
 * SSL CERTIFICATION ERROR from urllib2 - now you can specify a SSL certificate
-    to be used. If this code stops running with the error `SSL CERTIFICATE ERROR` etc.
-You can download a CA cert from mozilla.org [here](http://curl.haxx.se/docs/caextract.html)
-and supply the certificate during the download.
+    to be used. Download a certificate, e.g. cacert.pem from mozilla.org [here](http://curl.haxx.se/docs/caextract.html) and supply the certificate for the examples shown above. Do this at your own risk.
 
 # Known issues 
 * package without `tar.gz` download format cannot be installed - `Spack` currently doesn't
