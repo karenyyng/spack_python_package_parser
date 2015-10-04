@@ -5,6 +5,11 @@ simple script that crawls PyPI indices API for download info for a Python packag
 * one line summary of what the package is 
 * package homepage 
 
+# SSL certificate download
+If this code stops running with the error `SSL CERTIFICATE ERROR` etc.
+You can download a CA cert from mozilla.org [here](http://curl.haxx.se/docs/caextract.html)
+and supply the certificate during the download.
+
 # example usage:
 
 ## grep download info for single package
