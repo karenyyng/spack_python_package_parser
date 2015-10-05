@@ -234,8 +234,8 @@ if __name__ == "__main__":
             package = package.split('@')
             spack_name = parse_single_package(package, cert=cert)
             print (
-                "Use `spack edit {}` to inspect ".format(spack_name) +
-                "parsed file.")
+                "Use `spack edit {}` to inspect the parsed build recipe.".format(
+                    spack_name.split('@')[0]))
             print (
                 "or `spack install {}` to install package.".format(spack_name))
         else:
