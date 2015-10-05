@@ -35,7 +35,17 @@ def get_PyPI_download_URL_and_md5(package, cert=None):
 
     print ("Querying {}".format(package_URL))
     if cert is None:
-        response = urllib2.urlopen(package_URL)
+        try:
+            response = urllib2.urlopen(package_URL)
+        except urllib2.URLError:
+            raise urllib2.URLError(
+                "SSL CERTIFICATE_VERIFY_FAILED. \n"
+                "You can choose to supply a valid SSL certificate " +
+                "by downloading: cacert.pem from " + 
+                "http://curl.haxx.se/docs/caextract.html, then "
+                "rerun this code with: \n $ ./crawl_pypi_index.py " + 
+                "PACKAGE_NAME PATH_TO/cacert.pem\n"
+            )
     else:
         response = urllib2.urlopen(package_URL, cafile=cert)
 

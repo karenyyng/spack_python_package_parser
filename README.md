@@ -43,8 +43,12 @@ where `<PATH_TO_SSL_CERTIFICATE>` is an optional argument.
 Only supply it if there is an error.
 
 # Resolved issues
-* SSL CERTIFICATION ERROR from urllib2 - now you can specify a SSL certificate
-    to be used. Download a certificate, e.g. cacert.pem from mozilla.org [here](http://curl.haxx.se/docs/caextract.html) and supply the certificate for the examples shown above. Do this at your own risk.
+* `SSL CERTIFICATION ERROR` from urllib2 - now you can specify a SSL certificate
+    to be used. Download a certificate, e.g. cacert.pem from mozilla.org [here](http://curl.haxx.se/docs/caextract.html) and supply the certificate for the examples shown above. This is a potential risk that you can take. However, `Spack` is generally safe due to how it does `md5` checksum to guide against extra bits to prevent man-in-the-middle from inserting malicious code.
+
+```
+$ wget http://curl.haxx.se/ca/cacert.pem
+```
 
 # Known issues 
 * package without `tar.gz` download format cannot be installed - `Spack` currently doesn't
